@@ -1,103 +1,124 @@
 package com.dwiakbar.login;
 
+
 import android.os.Bundle;
-import android.util.Log; // Tambahkan ini untuk debugging
-import android.widget.ArrayAdapter;
+import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-
-// Import library AsyncHttpClient
-import com.loopj.android.http.AsyncHttpClient;
-import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.AsyncHttpResponseHandler;
 import cz.msebera.android.httpclient.Header;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Map;
 
 public class TambahMahasiswaActivity extends AppCompatActivity {
 
-    private EditText etNim, etNama, etTempatLahir, etTanggalLahir, etAlamat, etTahunMasuk;
-    private Spinner spJenisKelamin, spJurusan, spStatusNikah;
-    private Button btnSimpan;
+    private Button _saveButton;
+    private EditText _alamatEditText, _namaEditText, _nimEditText, _tahunMasukEditText, _tanggalLahirEditText, _tempatLahirEditText;
+    private Spinner _jenisKelaminSpinner, _jpSpinner, _statusNikahSpinner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tambah_mahasiswa);
 
-        // Inisialisasi View
-        etNim = findViewById(R.id.etNim);
-        etNama = findViewById(R.id.etNama);
-        etTempatLahir = findViewById(R.id.etTempatLahir);
-        etTanggalLahir = findViewById(R.id.etTanggalLahir);
-        etAlamat = findViewById(R.id.etAlamat);
-        etTahunMasuk = findViewById(R.id.etTahunMasuk);
-        spJenisKelamin = findViewById(R.id.spJenisKelamin);
-        spJurusan = findViewById(R.id.spJurusan);
-        spStatusNikah = findViewById(R.id.spStatusNikah);
-        btnSimpan = findViewById(R.id.btnSimpan);
-
-        setupSpinner(spJenisKelamin, new String[]{"Laki-laki", "Perempuan"});
-        setupSpinner(spJurusan, new String[]{"TI", "SI"});
-        setupSpinner(spStatusNikah, new String[]{"Menikah", "Belum Menikah"});
-
-        btnSimpan.setOnClickListener(v -> simpanDataKeServer());
+        initInputs();
+        initSaveButton();
     }
 
-    private void setupSpinner(Spinner spinner, String[] data) {
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, data);
-        spinner.setAdapter(adapter);
-    }
+    private void initSaveButton() {
+        _saveButton = findViewById(R.id.saveButton);
 
-    private void simpanDataKeServer() {
-        try {
-            // 1. Susun URL dengan encoding yang benar
-            String url = "https://stmikpontianak.cloud/011100862/tambahMahasiswa.php?" +
-                    "nim=" + URLEncoder.encode(etNim.getText().toString(), "UTF-8") +
-                    "&nama=" + URLEncoder.encode(etNama.getText().toString(), "UTF-8") +
-                    "&jenisKelamin=" + URLEncoder.encode(spJenisKelamin.getSelectedItem().toString(), "UTF-8") +
-                    "&tempatLahir=" + URLEncoder.encode(etTempatLahir.getText().toString(), "UTF-8") +
-                    "&tanggalLahir=" + URLEncoder.encode(etTanggalLahir.getText().toString(), "UTF-8") +
-                    "&statusPernikahan=" + URLEncoder.encode(spStatusNikah.getSelectedItem().toString(), "UTF-8") +
-                    "&alamat=" + URLEncoder.encode(etAlamat.getText().toString(), "UTF-8") +
-                    "&jp=" + URLEncoder.encode(spJurusan.getSelectedItem().toString(), "UTF-8") +
-                    "&tahunMasuk=" + URLEncoder.encode(etTahunMasuk.getText().toString(), "UTF-8");
+        _saveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String alamat = _alamatEditText.getText().toString();
+                String jenisKelamin = _jenisKelaminSpinner.getSelectedItem().toString();
+                String jp = _jpSpinner.getSelectedItem().toString();
+                String nama = _namaEditText.getText().toString();
+                String nim = _nimEditText.getText().toString();
+                String statusPernikahan = _statusNikahSpinner.getSelectedItem().toString();
+                String tahunMasuk = _tahunMasukEditText.getText().toString();
+                String tanggalLahir = _tanggalLahirEditText.getText().toString();
+                String tempatLahir = _tempatLahirEditText.getText().toString();
 
-            // 2. Kirim Request
-            AsyncHttpClient client = new AsyncHttpClient();
-            client.get(url, new AsyncHttpResponseHandler() {
-                @Override
-                public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                    String response = new String(responseBody);
-                    Log.d("API_DEBUG", "Respon: " + response); // Cek ini di Logcat
+                try {
+                    alamat = URLEncoder.encode(alamat, "utf-8");
+                    jenisKelamin = URLEncoder.encode(jenisKelamin, "utf-8");
+                    jp = URLEncoder.encode(jp, "utf-8");
+                    nama = URLEncoder.encode(nama, "utf-8");
+                    nim = URLEncoder.encode(nim, "utf-8");
+                    statusPernikahan = URLEncoder.encode(statusPernikahan, "utf-8");
+                    tanggalLahir = URLEncoder.encode(tanggalLahir, "utf-8");
+                    tempatLahir = URLEncoder.encode(tempatLahir, "utf-8");
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
 
-                    // 3. Parsing JSON Respon
-                    try {
-                        Gson gson = new Gson();
-                        Map<String, String> map = gson.fromJson(response, new TypeToken<Map<String, String>>(){}.getType());
+                String url = "https://stmikpontianak.cloud/011100862/tambahMahasiswa.php" +
+                        "?nim=" + nim +
+                        "&nama=" + nama +
+                        "&jenisKelamin=" + jenisKelamin +
+                        "&tempatLahir=" + tempatLahir +
+                        "&tanggalLahir=" + tanggalLahir +
+                        "&alamat=" + alamat +
+                        "&jp=" + jp +
+                        "&statusPernikahan=" + statusPernikahan +
+                        "&tahunMasuk=" + tahunMasuk;
 
-                        if ("ok".equals(map.get("status"))) {
-                            Toast.makeText(TambahMahasiswaActivity.this, "Berhasil: " + map.get("message"), Toast.LENGTH_SHORT).show();
-                            finish();
+                AsyncHttpClient ahc = new AsyncHttpClient();
+
+                ahc.get(url, new AsyncHttpResponseHandler() {
+                    @Override
+                    public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                        Log.d("*tw*", new String(responseBody));
+
+                        Gson g = new Gson();
+                        String responseString = new String(responseBody);
+                        Map<String, String> responseMap = g.fromJson(responseString, new TypeToken<Map<String, String>>(){}.getType());
+                        String status = responseMap.get("status");
+
+                        if (status != null && status.equals("ok")) {
+                            String message = responseMap.get("message");
+                            new AlertDialog.Builder(TambahMahasiswaActivity.this)
+                                    .setTitle("Berhasil")
+                                    .setMessage(message)
+                                    .show();
                         } else {
-                            Toast.makeText(TambahMahasiswaActivity.this, "Server: " + map.get("message"), Toast.LENGTH_LONG).show();
+                            String errorMessage = responseMap.get("message");
+                            new AlertDialog.Builder(TambahMahasiswaActivity.this)
+                                    .setTitle("Error")
+                                    .setMessage(errorMessage)
+                                    .show();
                         }
-                    } catch (Exception e) {
-                        Toast.makeText(TambahMahasiswaActivity.this, "Format JSON salah", Toast.LENGTH_SHORT).show();
                     }
-                }
 
-                @Override
-                public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                    Toast.makeText(TambahMahasiswaActivity.this, "Gagal koneksi server", Toast.LENGTH_SHORT).show();
-                }
-            });
-        } catch (Exception e) {
-            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-        }
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                        Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+        });
+    }
+
+    private void initInputs() {
+        _alamatEditText = findViewById(R.id.alamatEditText);
+        _jenisKelaminSpinner = findViewById(R.id.jenisKelaminSpinner);
+        _jpSpinner = findViewById(R.id.jpSpinner);
+        _namaEditText = findViewById(R.id.namaEditText);
+        _nimEditText = findViewById(R.id.nimEditText);
+        _statusNikahSpinner = findViewById(R.id.statusNikahSpinner);
+        _tahunMasukEditText = findViewById(R.id.tahunMasukEditText);
+        _tanggalLahirEditText = findViewById(R.id.tanggalLahirEditText);
+        _tempatLahirEditText = findViewById(R.id.tempatLahirEditText);
     }
 }
